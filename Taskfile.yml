@@ -1,0 +1,72 @@
+version: '3'
+
+vars:
+  BINARY_NAME: mini-blockchain
+
+tasks:
+  # === Go ===
+  build:
+    desc: Compila el binario
+    cmd: go build -o {{.BINARY_NAME}} ./cmd/main.go
+
+  run:
+    desc: Ejecuta sin compilar
+    cmd: go run ./cmd/main.go
+
+  test:
+    desc: Corre todos los tests
+    cmd: go test ./... -v
+
+  vet:
+    desc: Análisis estático
+    cmd: go vet ./...
+
+  lint:
+    desc: Alias de vet
+    deps: [vet]
+
+  swagger:
+    desc: Genera/actualiza documentación Swagger
+    cmd: swag init -g cmd/main.go --parseDependency --output docs
+
+  clean:
+    desc: Limpia binario y datos
+    cmd: rm -f {{.BINARY_NAME}} && rm -rf data/
+
+  # === Frontend ===
+  frontend:install:
+    desc: Instala dependencias del frontend
+    dir: frontend
+    cmd: npm install
+
+  frontend:dev:
+    desc: Inicia servidor de desarrollo frontend (puerto 5173)
+    dir: frontend
+    cmd: npm run dev
+
+  frontend:build:
+    desc: Build del frontend para producción
+    dir: frontend
+    cmd: npm run build
+
+  # === Docker ===
+  docker:build:
+    desc: Construye imagen Docker
+    cmd: docker compose build
+
+  docker:up:
+    desc: Levanta servicio en background
+    cmd: docker compose up -d
+
+  docker:down:
+    desc: Baja el servicio
+    cmd: docker compose down
+
+  docker:logs:
+    desc: Sigue los logs
+    cmd: docker compose logs -f
+
+  # === Dev ===
+  dev:
+    desc: Inicia backend + frontend concurrentemente
+    deps: [run, frontend:dev]

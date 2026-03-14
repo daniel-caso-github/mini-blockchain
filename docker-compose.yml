@@ -1,0 +1,15 @@
+services:
+  blockchain:
+    build: .
+    ports:
+      - "${PORT:-8080}:8080"
+    environment:
+      - PORT=8080
+      - DIFFICULTY=${DIFFICULTY:-2}
+      - DB_PATH=/data/blockchain.db
+    volumes:
+      - chain-data:/data
+    restart: unless-stopped
+
+volumes:
+  chain-data:
