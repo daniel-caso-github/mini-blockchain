@@ -1,0 +1,254 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "A minimal blockchain implementation in Go with REST API.",
+        "title": "Mini Blockchain API",
+        "contact": {},
+        "version": "1.0"
+    },
+    "host": "localhost:8080",
+    "basePath": "/",
+    "paths": {
+        "/block/{id}": {
+            "get": {
+                "description": "Returns a single block from the blockchain by its numeric index (0 = genesis block)",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "blockchain"
+                ],
+                "summary": "Get a block by index",
+                "operationId": "get-block-by-id",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Block index",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_danielcaso_mini-blockchain_internal_blockchain.Block"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/internal_api.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/internal_api.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/chain": {
+            "get": {
+                "description": "Returns all blocks in the blockchain, including total length and current mining difficulty",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "blockchain"
+                ],
+                "summary": "Get the full blockchain",
+                "operationId": "get-chain",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/internal_api.ChainResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/health": {
+            "get": {
+                "description": "Returns the current health status of the API server",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "system"
+                ],
+                "summary": "Health check",
+                "operationId": "health-check",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/internal_api.HealthResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/mine": {
+            "post": {
+                "description": "Creates and mines a new block with the provided data using Proof of Work. The block is appended to the chain and persisted to the database",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "blockchain"
+                ],
+                "summary": "Mine a new block",
+                "operationId": "mine-block",
+                "parameters": [
+                    {
+                        "description": "Block data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_api.MineRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_danielcaso_mini-blockchain_internal_blockchain.Block"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/internal_api.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_api.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/validate": {
+            "get": {
+                "description": "Verifies the integrity of the entire blockchain by checking hashes, links, and proof of work for every block",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "blockchain"
+                ],
+                "summary": "Validate chain integrity",
+                "operationId": "validate-chain",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/internal_api.ValidateResponse"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "github_com_danielcaso_mini-blockchain_internal_blockchain.Block": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "string",
+                    "example": "Hello Blockchain"
+                },
+                "hash": {
+                    "type": "string",
+                    "example": "0000fedcba0987654321"
+                },
+                "index": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "nonce": {
+                    "type": "integer",
+                    "example": 12345
+                },
+                "prev_hash": {
+                    "type": "string",
+                    "example": "0000abcdef1234567890"
+                },
+                "timestamp": {
+                    "type": "string",
+                    "example": "2024-01-01T00:00:00Z"
+                }
+            }
+        },
+        "internal_api.ChainResponse": {
+            "type": "object",
+            "properties": {
+                "chain": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_danielcaso_mini-blockchain_internal_blockchain.Block"
+                    }
+                },
+                "difficulty": {
+                    "type": "integer",
+                    "example": 2
+                },
+                "length": {
+                    "type": "integer",
+                    "example": 5
+                }
+            }
+        },
+        "internal_api.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string",
+                    "example": "something went wrong"
+                }
+            }
+        },
+        "internal_api.HealthResponse": {
+            "type": "object",
+            "properties": {
+                "status": {
+                    "type": "string",
+                    "example": "ok"
+                }
+            }
+        },
+        "internal_api.MineRequest": {
+            "type": "object",
+            "required": [
+                "data"
+            ],
+            "properties": {
+                "data": {
+                    "type": "string",
+                    "example": "Hello Blockchain"
+                }
+            }
+        },
+        "internal_api.ValidateResponse": {
+            "type": "object",
+            "properties": {
+                "valid": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        }
+    }
+}
