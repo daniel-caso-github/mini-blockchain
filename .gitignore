@@ -25,3 +25,10 @@ frontend/dist/
 .vscode/
 *.swp
 *.swo
+
+# Claude
+.claude/
+CLAUDE.md
+
+# Spec
+mini_blockchain_spec.md
